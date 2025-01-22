@@ -1,1 +1,1 @@
-# HarcamaTakipSistemi - ScooMate
+# Harcama Takip Sistemi - ScooMate
