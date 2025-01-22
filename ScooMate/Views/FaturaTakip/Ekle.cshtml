@@ -1,0 +1,138 @@
+@model ScooMate.Models.FaturaTakip
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Yeni Fatura Takibi Ekle</h2>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @Html.ValidationSummary(false)
+                </div>
+            }
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group mb-3">
+                    <label asp-for="FaturaTipi">Fatura Tipi</label>
+                    <select asp-for="FaturaTipi" class="form-control" asp-items="Html.GetEnumSelectList<FaturaTipi>()"
+                        onchange="faturaTipiDegisti(this)">
+                    </select>
+                    <span asp-validation-for="FaturaTipi" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="FaturaAdi">Fatura Adı</label>
+                    <input asp-for="FaturaAdi" class="form-control" />
+                    <span asp-validation-for="FaturaAdi" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Tutar">Tutar</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="Tutar" name="Tutar" value="0,00" data-val="true"
+                            data-val-required="Tutar zorunludur" data-val-regex="Geçerli bir tutar giriniz"
+                            data-val-regex-pattern="^\d{1,16}(,\d{0,2})?$" oninput="formatTutar(this)" />
+                        <span class="input-group-text">₺</span>
+                    </div>
+                    <span asp-validation-for="Tutar" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="FaturaKesimGunu">Fatura Kesim Günü</label>
+                            <input asp-for="FaturaKesimGunu" class="form-control" type="number" min="1" max="31" />
+                            <span asp-validation-for="FaturaKesimGunu" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="SonOdemeGunu">Son Ödeme Günü</label>
+                            <input asp-for="SonOdemeGunu" class="form-control" type="number" min="1" max="31" />
+                            <span asp-validation-for="SonOdemeGunu" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Aciklama">Açıklama</label>
+                    <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Aciklama" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="OtomatikOdeme" class="form-check-input" type="checkbox" />
+                    <label asp-for="OtomatikOdeme" class="form-check-label">Otomatik Ödeme</label>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Kaydet
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> İptal
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function faturaTipiDegisti(select) {
+            var faturaAdiInput = document.getElementById('FaturaAdi');
+            var selectedText = select.options[select.selectedIndex].text;
+
+            // Diğer seçeneği dışında fatura adını otomatik doldur
+            if (select.value !== '@((int)FaturaTipi.Diger)') {
+                faturaAdiInput.value = selectedText;
+            }
+        }
+
+        function formatTutar(input) {
+            // Sadece sayı ve virgüle izin ver
+            let value = input.value.replace(/[^0-9,]/g, '');
+
+            // Virgül kontrolü
+            if (value.includes(',')) {
+                let [lira, kurus] = value.split(',');
+                // Kuruş kısmını maksimum 2 basamakla sınırla
+                if (kurus && kurus.length > 2) {
+                    kurus = kurus.slice(0, 2);
+                }
+                value = lira + ',' + (kurus || '');
+            }
+
+            input.value = value;
+        }
+
+        // Input'tan çıkıldığında format kontrolü
+        document.getElementById('Tutar').onblur = function () {
+            if (this.value) {
+                // Sadece virgül girilmişse başına 0 ekle
+                if (this.value === ',') {
+                    this.value = '0,';
+                }
+                // Virgül varsa ve tek basamak girilmişse sıfır ekle
+                if (this.value.includes(',') && this.value.split(',')[1].length === 1) {
+                    this.value = this.value + '0';
+                }
+                // Virgül yoksa ,00 ekle
+                if (!this.value.includes(',')) {
+                    this.value = this.value + ',00';
+                }
+            } else {
+                this.value = '0,00';
+            }
+        };
+    </script>
+}

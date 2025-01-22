@@ -1,0 +1,94 @@
+﻿@model ScooMate.Models.ViewModels.AnasayfaViewModel
+@{
+    ViewData["Title"] = "Anasayfa";
+}
+
+<div class="container">
+    @if (TempData["Mesaj"] != null)
+    {
+        <div class="alert alert-@TempData["MesajTipi"] alert-dismissible fade show" role="alert">
+            @TempData["Mesaj"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Bu Ayki Toplam Harcama</h5>
+                    <p class="card-text display-4">@Model.BuAykiToplamHarcama.ToString("C")</p>
+                </div>
+            </div>
+        </div>
+        @if (Model.AylikButce != null)
+        {
+            <div class="col-md-12 mt-4">
+                <div class="card @(Model.AylikButce.KullanilabilirLimit > Model.BuAykiToplamHarcama ? "bg-success" : "bg-danger") text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Aylık Bütçe Durumu</h5>
+                                <p class="mb-0">Kalan Limit: @((Model.AylikButce.KullanilabilirLimit - Model.BuAykiToplamHarcama).ToString("C"))</p>
+                            </div>
+                            <a href="@Url.Action("Index", "ButcePlanlama")" class="btn btn-light">
+                                <i class="fas fa-cog me-1"></i>Bütçe Planlaması
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2>Kategoriler</h2>
+        </div>
+    </div>
+    <div class="row">
+        @foreach (var kategori in Model.Kategoriler)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="kategori-simge">
+                            @if (!string.IsNullOrEmpty(kategori.OzelSimgeDosyasi))
+                            {
+                                <img src="~/img/kategoriler/@kategori.OzelSimgeDosyasi" alt="@kategori.KategoriAdi" />
+                            }
+                            else
+                            {
+                                <div class="kategori-varsayilan">
+                                    <span>@kategori.KategoriAdi[0]</span>
+                                </div>
+                            }
+                        </div>
+                        <h5 class="card-title">@kategori.KategoriAdi</h5>
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("Detay", "Kategori", new { id = kategori.KategoriID })"
+                               class="btn btn-primary">
+                                <i class="fas fa-list-ul me-1"></i> Harcamaları Görüntüle
+                            </a>
+                            <a href="@Url.Action("Duzenle", "Kategori", new { id = kategori.KategoriID })"
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-cog me-1"></i> Düzenle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus fa-3x mb-3"></i>
+                    <h5 class="card-title">Yeni Kategori</h5>
+                    <a href="@Url.Action("Ekle", "Kategori")" class="btn btn-success">Kategori Ekle</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+

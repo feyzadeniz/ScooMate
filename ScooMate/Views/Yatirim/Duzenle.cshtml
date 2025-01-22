@@ -1,0 +1,139 @@
+@model ScooMate.Models.Yatirim
+
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="card-title mb-0">Yatırım Düzenle</h2>
+        <div>
+          <a href="@Url.Action("Index")" class="btn btn-outline-primary me-2">
+            <i class="fas fa-arrow-left me-1"></i> Yatırımlarıma Dön
+          </a>
+          <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#silModal">
+            <i class="fas fa-trash-alt me-1"></i> Sil
+          </button>
+        </div>
+      </div>
+
+      @if (!ViewData.ModelState.IsValid)
+      {
+        <div class="alert alert-danger">
+          @Html.ValidationSummary(false)
+        </div>
+      }
+
+      @using (Html.BeginForm())
+      {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.YatirimID)
+
+        <div class="form-group mb-3">
+          <label for="Tur">Yatırım Türü</label>
+          @Html.DropDownListFor(m => m.Tur,
+                 new SelectList(Enum.GetValues(typeof(YatirimTuru))),
+                 new { @class = "form-select", required = "required" })
+          @Html.ValidationMessageFor(m => m.Tur, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Miktar">Miktar (TL)</label>
+          @Html.TextBoxFor(m => m.Miktar, new
+            {
+              @class = "form-control",
+              type = "text",
+              onkeypress = "return isNumberKey(event)",
+              onblur = "formatTutar(this)",
+              required = "required"
+            })
+          @Html.ValidationMessageFor(m => m.Miktar, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Tarih">Tarih</label>
+          @Html.TextBoxFor(m => m.Tarih, new
+            {
+              @class = "form-control",
+              type = "date",
+              required = "required"
+            })
+          @Html.ValidationMessageFor(m => m.Tarih, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Aciklama">Açıklama</label>
+          @Html.TextAreaFor(m => m.Aciklama, new { @class = "form-control", rows = "3" })
+          @Html.ValidationMessageFor(m => m.Aciklama, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Kaydet
+          </button>
+          <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="fas fa-times me-1"></i> İptal
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Silme Onay Modalı -->
+<div class="modal fade" id="silModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Yatırım Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Dikkat:</strong> Bu yatırımı silmek istediğinizden emin misiniz?
+        </p>
+        <p>
+          Tür: @Model.Tur<br>
+          Miktar: @Model.Miktar.ToString("N2") TL<br>
+          Tarih: @Model.Tarih.ToShortDateString()
+        </p>
+      </div>
+      <div class="modal-footer">
+        @using (Html.BeginForm("Sil", "Yatirim", new { id = Model.YatirimID }, FormMethod.Post))
+        {
+          @Html.AntiForgeryToken()
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-1"></i> Sil
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    function isNumberKey(evt) {
+      var charCode = (evt.which) ? evt.which : evt.keyCode;
+      if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
+        return false;
+      return true;
+    }
+
+    function formatTutar(input) {
+      let value = input.value.replace(/[^0-9,]/g, '');
+
+      if (value.includes(',')) {
+        let [lira, kurus] = value.split(',');
+        if (kurus && kurus.length > 2) {
+          kurus = kurus.slice(0, 2);
+        }
+        value = lira + ',' + (kurus || '00');
+      } else {
+        value = value + ',00';
+      }
+
+      input.value = value || '0,00';
+    }
+  </script>
+}

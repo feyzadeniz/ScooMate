@@ -1,0 +1,206 @@
+@model ScooMate.ViewModels.IstatistikViewModel
+
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">@Model.DonemAdi İstatistikleri</h2>
+    <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <i class="fas fa-calendar me-1"></i> Dönem Seç
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        @foreach (var donem in Model.Donemler)
+        {
+          <li>
+            <a class="dropdown-item @(donem == Model.Tarih ? "active" : "")"
+              href="@Url.Action("Index", new { tarih = donem })">
+              @donem.ToString("MMMM yyyy")
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Aylık Toplam ve Günlük Ortalama -->
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title text-primary">Aylık Toplam Harcama</h5>
+          <h3 class="mt-3">@Model.AylikToplamHarcama.ToString("N2") ₺</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title text-success">Günlük Ortalama</h5>
+          <h3 class="mt-3">@Model.GunlukOrtalamaHarcama.ToString("N2") ₺</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Kategorik Harcamalar -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Kategorilere Göre Harcamalar</h5>
+          <div class="mb-4" style="height: 300px;">
+            <canvas id="kategoriChart"></canvas>
+          </div>
+          @foreach (var kategori in Model.KategorikHarcamalar)
+          {
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span>@kategori.Kategori</span>
+                <strong>@kategori.ToplamTutar.ToString("N2") ₺</strong>
+              </div>
+              <div class="progress">
+                @{
+                  var yuzde = Model.AylikToplamHarcama > 0
+                  ? (int)((kategori.ToplamTutar / Model.AylikToplamHarcama) * 100)
+                  : 0;
+                }
+                <div class="progress-bar" role="progressbar" style="width: @yuzde%" aria-valuenow="@yuzde"
+                  aria-valuemin="0" aria-valuemax="100">
+                  @yuzde%
+                </div>
+              </div>
+              <small class="text-muted">@kategori.HarcamaSayisi işlem</small>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- En Yüksek Harcamalar -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title mb-4">En Yüksek Harcamalar</h5>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Kategori</th>
+                  <th>Tutar</th>
+                  <th>Tarih</th>
+                  <th>Açıklama</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach (var harcama in Model.EnYuksekHarcamalar)
+                {
+                  <tr>
+                    <td>@harcama.HarcamaKalemi</td>
+                    <td>@harcama.Tutar.ToString("N2") ₺</td>
+                    <td>@harcama.Tarih.ToString("dd.MM.yyyy")</td>
+                    <td>@harcama.Aciklama</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yıllık Özet -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-4">@Model.YillikOzet.Yil Yılı Özeti</h5>
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-chart-line fa-2x text-primary me-3"></i>
+            <div>
+              <div class="text-muted small">Yıllık Toplam</div>
+              <strong>@Model.YillikOzet.YillikToplamHarcama.ToString("N2") ₺</strong>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-arrow-trend-up fa-2x text-success me-3"></i>
+            <div>
+              <div class="text-muted small">En Yüksek Ay (@Model.YillikOzet.EnYuksekAy)</div>
+              <strong>@Model.YillikOzet.EnYuksekAylikHarcama.ToString("N2") ₺</strong>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-arrow-trend-down fa-2x text-info me-3"></i>
+            <div>
+              <div class="text-muted small">En Düşük Ay (@Model.YillikOzet.EnDusukAy)</div>
+              <strong>@Model.YillikOzet.EnDusukAylikHarcama.ToString("N2") ₺</strong>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-calculator fa-2x text-warning me-3"></i>
+            <div>
+              <div class="text-muted small">Aylık Ortalama</div>
+              <strong>@Model.YillikOzet.AylikOrtalama.ToString("N2") ₺</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3">
+        <div class="text-muted small">En Çok Harcanan Kategori</div>
+        <strong>@Model.YillikOzet.EnCokHarcananKategori</strong>
+        <span class="text-muted">(@Model.YillikOzet.EnCokHarcananKategoriTutar.ToString("N2") ₺)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('kategoriChart').getContext('2d');
+
+    // Kategori-Renk eşleştirmesi
+    const KATEGORI_RENKLERI = {
+      'Market': '#FF6384',    // Kırmızı
+      'Ulaşım': '#36A2EB',    // Mavi
+      'Yemek': '#FFCE56',     // Sarı
+      'Fatura': '#4BC0C0',    // Turkuaz
+      'Kira': '#9966FF',      // Mor
+      'Eğlence': '#FF9F40',   // Turuncu
+      'Diğer': '#808080'      // Gri
+    };
+
+    const kategoriler = [@Html.Raw(string.Join(",", Model.KategorikHarcamalar.Select(k => $"'{k.Kategori}'")))];
+    const veriler = [@string.Join(",", Model.KategorikHarcamalar.Select(k => k.ToplamTutar))];
+
+    // Her kategori için doğru rengi seç
+    const renkler = kategoriler.map(kategori =>
+      KATEGORI_RENKLERI[kategori.replace(/'/g, '')] || '#808080'
+    );
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: kategoriler,
+        datasets: [{
+          data: veriler,
+          backgroundColor: renkler
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          }
+        }
+      }
+    });
+  </script>
+}

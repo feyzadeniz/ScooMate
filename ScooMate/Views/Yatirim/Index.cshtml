@@ -1,0 +1,104 @@
+@model IEnumerable<ScooMate.Models.Yatirim>
+
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="card-title mb-0">Yatırımlarım</h2>
+        <a href="@Url.Action("Ekle")" class="btn btn-success">
+          <i class="fas fa-plus me-1"></i> Yeni Yatırım Ekle
+        </a>
+      </div>
+
+      @if (TempData["Mesaj"] != null)
+      {
+        <div class="alert alert-@TempData["MesajTipi"]" role="alert">
+          @TempData["Mesaj"]
+        </div>
+      }
+
+      @if (Model.Any())
+      {
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tür</th>
+                <th>Miktar</th>
+                <th>Tarih</th>
+                <th>Açıklama</th>
+                <th class="text-end">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (var yatirim in Model)
+              {
+                <tr>
+                  <td>@yatirim.Tur.ToString()</td>
+                  <td>@yatirim.Miktar.ToString("N2") TL</td>
+                  <td>@yatirim.Tarih.ToShortDateString()</td>
+                  <td>@yatirim.Aciklama</td>
+                  <td class="text-end">
+                    <a href="@Url.Action("Duzenle", new { id = yatirim.YatirimID })" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-1"
+                      onclick="yatirimSil(@yatirim.YatirimID, '@yatirim.Tur', @yatirim.Miktar)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      else
+      {
+        <div class="alert alert-info">
+          Henüz yatırım kaydı bulunmamaktadır.
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Silme Onay Modalı -->
+<div class="modal fade" id="silModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Yatırım Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Dikkat:</strong> Bu yatırımı silmek istediğinizden emin misiniz?
+        </p>
+        <p id="yatirimDetay"></p>
+      </div>
+      <div class="modal-footer">
+        <form id="silForm" method="post">
+          @Html.AntiForgeryToken()
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-1"></i> Sil
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    function yatirimSil(yatirimId, tur, miktar) {
+      document.getElementById('yatirimDetay').innerHTML =
+        `Tür: ${tur}<br>Miktar: ${miktar.toFixed(2)} TL`;
+      document.getElementById('silForm').action =
+        '@Url.Action("Sil")/' + yatirimId;
+      new bootstrap.Modal(document.getElementById('silModal')).show();
+    }
+  </script>
+}

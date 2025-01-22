@@ -1,0 +1,183 @@
+@model ScooMate.Models.BorcTakip
+
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="card-title mb-0">Borç Takibi Düzenle</h2>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#silModal">
+          <i class="fas fa-trash-alt me-1"></i> Sil
+        </button>
+      </div>
+
+      @if (!ViewData.ModelState.IsValid)
+      {
+        <div class="alert alert-danger">
+          @Html.ValidationSummary(false)
+        </div>
+      }
+
+      @using (Html.BeginForm())
+      {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.BorcID)
+
+        <div class="form-group mb-3">
+          <label asp-for="BorcTipi">Borç Tipi</label>
+          <select asp-for="BorcTipi" class="form-control" asp-items="Html.GetEnumSelectList<BorcTipi>()"
+            onchange="borcTipiDegisti(this)">
+          </select>
+          <span asp-validation-for="BorcTipi" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+          <label asp-for="BorcAdi">Borç Adı</label>
+          <input asp-for="BorcAdi" class="form-control" />
+          <span asp-validation-for="BorcAdi" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+          <label asp-for="Tutar">Tutar</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="Tutar" name="Tutar" value="@Model.Tutar.ToString("N2")"
+              onblur="formatTutar(this)" />
+            <span class="input-group-text">₺</span>
+          </div>
+          <span asp-validation-for="Tutar" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label asp-for="HesapKesimGunu">Hesap Kesim Günü</label>
+              <input asp-for="HesapKesimGunu" class="form-control" type="number" min="1" max="31" />
+              <span asp-validation-for="HesapKesimGunu" class="text-danger"></span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label asp-for="SonOdemeGunu">Son Ödeme Günü</label>
+              <input asp-for="SonOdemeGunu" class="form-control" type="number" min="1" max="31" />
+              <span asp-validation-for="SonOdemeGunu" class="text-danger"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label asp-for="Aciklama">Açıklama</label>
+          <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
+          <span asp-validation-for="Aciklama" class="text-danger"></span>
+        </div>
+
+        <div class="form-check mb-3">
+          <input asp-for="OtomatikOdeme" class="form-check-input" type="checkbox" onchange="otomatikOdemeChanged(this)" />
+          <label asp-for="OtomatikOdeme" class="form-check-label">Otomatik Ödeme</label>
+        </div>
+
+        <div id="otomatikOdemeTutariDiv" class="form-group mb-3" style="display: none;">
+          <label asp-for="OtomatikOdemeTutari">Otomatik Ödeme Tutarı</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="OtomatikOdemeTutari" name="OtomatikOdemeTutari"
+              value="@(Model.OtomatikOdemeTutari?.ToString("N2") ?? "0,00")" onblur="formatTutar(this)" />
+            <span class="input-group-text">₺</span>
+          </div>
+          <span asp-validation-for="OtomatikOdemeTutari" class="text-danger"></span>
+        </div>
+
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Kaydet
+          </button>
+          <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="fas fa-times me-1"></i> İptal
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Silme Modal -->
+<div class="modal fade" id="silModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Borç Takibini Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Dikkat:</strong> Bu borç takibini silmek istediğinizden emin misiniz?
+        </p>
+        <p>Bu işlem geri alınamaz.</p>
+      </div>
+      <div class="modal-footer">
+        @using (Html.BeginForm("Sil", "BorcTakip", new { id = Model.BorcID }, FormMethod.Post))
+        {
+          @Html.AntiForgeryToken()
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-1"></i> Sil
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+  }
+
+  <script>
+    function borcTipiDegisti(select) {
+      var borcAdiInput = document.getElementById('BorcAdi');
+      var selectedText = select.options[select.selectedIndex].text;
+
+      // Diğer seçeneği dışında borç adını otomatik doldur
+      if (select.value !== '@((int)BorcTipi.Diger)') {
+        borcAdiInput.value = selectedText;
+      }
+    }
+
+    function formatTutar(input) {
+      if (input.value) {
+        // Sadece sayı ve virgüle izin ver
+        let value = input.value.replace(/[^0-9,]/g, '');
+
+        // Virgül kontrolü
+        if (value.includes(',')) {
+          let [lira, kurus] = value.split(',');
+          // Kuruş kısmını maksimum 2 basamakla sınırla
+          if (kurus && kurus.length > 2) {
+            kurus = kurus.slice(0, 2);
+          }
+          value = lira + ',' + (kurus || '00');
+        } else {
+          value = value + ',00';
+        }
+
+        input.value = value || '0,00';
+      } else {
+        input.value = '0,00';
+      }
+    }
+
+    function otomatikOdemeChanged(checkbox) {
+      var tutarDiv = document.getElementById('otomatikOdemeTutariDiv');
+      tutarDiv.style.display = checkbox.checked ? 'block' : 'none';
+
+      if (!checkbox.checked) {
+        document.getElementById('OtomatikOdemeTutari').value = '0,00';
+      }
+    }
+
+    // Sayfa yüklendiğinde otomatik ödeme durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', function () {
+      var checkbox = document.querySelector('input[name="OtomatikOdeme"]');
+      otomatikOdemeChanged(checkbox);
+    });
+  </script>
+}

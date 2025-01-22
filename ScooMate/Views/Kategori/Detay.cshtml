@@ -1,0 +1,139 @@
+@model ScooMate.Models.Kategori
+
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="card-title mb-0">@Model.KategoriAdi - Harcamalar</h2>
+        <div>
+          <a href="@Url.Action("Ekle", "Harcama", new { kategoriId = Model.KategoriID })" class="btn btn-success mb-3">
+            <i class="fas fa-plus me-1"></i> Yeni Harcama Ekle
+          </a>
+          <button type="button" class="btn btn-danger mb-3 ms-2" data-bs-toggle="modal"
+            data-bs-target="#tumunuSilModal">
+            <i class="fas fa-trash-alt me-1"></i> Tüm Harcamaları Sil
+          </button>
+        </div>
+      </div>
+
+      @if (TempData["Mesaj"] != null)
+      {
+        <div class="alert alert-@TempData["MesajTipi"]" role="alert">
+          @TempData["Mesaj"]
+        </div>
+      }
+
+      <p class="lead">Bu ayki toplam harcama: @Model.Harcamalar.Where(h => h.Tarih.Month == DateTime.Now.Month).Sum(h =>
+        h.Miktar) TL</p>
+
+      @if (Model.Harcamalar.Any())
+      {
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Miktar (TL)</th>
+              <th>Açıklama</th>
+              <th class="text-end">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (var harcama in Model.Harcamalar.OrderByDescending(h => h.Tarih))
+            {
+              <tr>
+                <td>@harcama.Tarih.ToShortDateString()</td>
+                <td>@harcama.Miktar.ToString("N2") TL</td>
+                <td>@harcama.Aciklama</td>
+                <td class="text-end">
+                  <a href="@Url.Action("Duzenle", "Harcama", new { id = harcama.HarcamaID })"
+                    class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-1"
+                    onclick="harcamaSil(@harcama.HarcamaID, '@harcama.Tarih.ToShortDateString()', @harcama.Miktar)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+      else
+      {
+        <div class="alert alert-info">
+          Henüz harcama kaydı bulunmamaktadır.
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Tümünü Silme Onay Modalı -->
+<div class="modal fade" id="tumunuSilModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tüm Harcamaları Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Dikkat:</strong> Bu kategorideki tüm harcamaları silmek istediğinizden emin misiniz?
+        </p>
+        <p>Bu işlem geri alınamaz.</p>
+      </div>
+      <div class="modal-footer">
+        @using (Html.BeginForm("TumHarcamalariSil", "Kategori", new { id = Model.KategoriID }, FormMethod.Post))
+        {
+          @Html.AntiForgeryToken()
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-1"></i> Tümünü Sil
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tekli Harcama Silme Modalı -->
+<div class="modal fade" id="harcamaSilModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Harcama Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Dikkat:</strong> Bu harcamayı silmek istediğinizden emin misiniz?
+        </p>
+        <p id="harcamaDetay"></p>
+      </div>
+      <div class="modal-footer">
+        <form id="harcamaSilForm" method="post">
+          @Html.AntiForgeryToken()
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-1"></i> Sil
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    function harcamaSil(harcamaId, tarih, miktar) {
+      document.getElementById('harcamaDetay').innerHTML =
+        `Tarih: ${tarih}<br>Miktar: ${miktar.toFixed(2)} TL`;
+      document.getElementById('harcamaSilForm').action =
+        '@Url.Action("Sil", "Harcama")/' + harcamaId;
+      new bootstrap.Modal(document.getElementById('harcamaSilModal')).show();
+    }
+  </script>
+}

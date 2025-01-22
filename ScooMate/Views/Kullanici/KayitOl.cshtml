@@ -1,0 +1,80 @@
+﻿@model ScooMate.Models.Kullanici
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Kayıt Ol</h3>
+                    @using (Html.BeginForm("KayitOl", "Kullanici", FormMethod.Post, new
+                    {
+                        @class = "register-form",
+                        onsubmit = "return true;"
+                    }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="form-group mb-3">
+                            <label for="Ad">Ad</label>
+                            @Html.TextBoxFor(m => m.Ad, new
+                                {
+                                    @class = "form-control",
+                                    required = "required",
+                                    onkeypress = "if(event.keyCode==13) { document.getElementById('kayitButton').click(); }"
+                                })
+                            @Html.ValidationMessageFor(m => m.Ad, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="Soyad">Soyad</label>
+                            @Html.TextBoxFor(m => m.Soyad, new
+                                {
+                                    @class = "form-control",
+                                    required = "required",
+                                    onkeypress = "if(event.keyCode==13) { document.getElementById('kayitButton').click(); }"
+                                })
+                            @Html.ValidationMessageFor(m => m.Soyad, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="Email">Email</label>
+                            @Html.TextBoxFor(m => m.Email, new
+                                {
+                                    @class = "form-control",
+                                    type = "email",
+                                    required =
+                                     "required",
+                                    onkeypress = "if(event.keyCode==13) { document.getElementById('kayitButton').click(); }"
+                                })
+                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="Telefon">Telefon</label>
+                            @Html.TextBoxFor(m => m.Telefon, new
+                                {
+                                    @class = "form-control",
+                                    required = "required",
+                                    onkeypress = "if(event.keyCode==13) { document.getElementById('kayitButton').click(); }"
+                                })
+                            @Html.ValidationMessageFor(m => m.Telefon, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="Sifre">Şifre</label>
+                            @Html.PasswordFor(m => m.Sifre, new
+                                {
+                                    @class = "form-control",
+                                    required = "required",
+                                    onkeypress = "if(event.keyCode==13) { document.getElementById('kayitButton').click(); }"
+                                })
+                            @Html.ValidationMessageFor(m => m.Sifre, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="text-danger">
+                            @Html.ValidationSummary(true)
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="kayitButton">Kayıt Ol</button>
+                    }
+                    <div class="mt-3 text-center">
+                        <p>Zaten hesabınız var mı? @Html.ActionLink("Giriş Yap", "GirisYap", "Kullanici")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

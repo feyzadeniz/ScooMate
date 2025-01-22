@@ -1,0 +1,142 @@
+@using ScooMate.Extensions
+@model IEnumerable<ScooMate.Models.BorcTakip>
+
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <h2 class="mb-0">Borç Takibi</h2>
+    </div>
+    <a href="@Url.Action("Ekle")" class="btn btn-primary">
+      <i class="fas fa-plus me-1"></i> Yeni Borç Ekle
+    </a>
+  </div>
+
+  @if (TempData["Mesaj"] != null)
+  {
+    <div class="alert alert-@TempData["MesajTipi"] alert-dismissible fade show" role="alert">
+      @TempData["Mesaj"]
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  }
+
+  @if (!Model.Any())
+  {
+    <div class="alert alert-info">
+      Henüz borç takibi eklenmemiş.
+    </div>
+  }
+  else
+  {
+    <div class="row">
+      @foreach (var borc in Model)
+      {
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h5 class="card-title mb-1">@borc.BorcAdi</h5>
+                  <span class="badge bg-secondary">@borc.BorcTipi.GetDisplayName()</span>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" href="@Url.Action("Duzenle", new { id = borc.BorcID })">
+                        <i class="fas fa-edit me-2"></i>Düzenle
+                      </a>
+                    </li>
+                    <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                      <button class="dropdown-item text-danger" type="button"
+                        onclick="silmeModaliniGoster(@borc.BorcID, '@borc.BorcAdi')">
+                        <i class="fas fa-trash-alt me-2"></i>Sil
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Tutar:</span>
+                  <strong>@borc.Tutar.ToString("N2") ₺</strong>
+                </div>
+                @if (borc.HesapKesimGunu > 0)
+                {
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Hesap Kesim:</span>
+                    <span>@borc.HesapKesimGunu</span>
+                  </div>
+                }
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Son Ödeme:</span>
+                  <span>@borc.SonOdemeGunu</span>
+                </div>
+              </div>
+
+              @if (!string.IsNullOrEmpty(borc.Aciklama))
+              {
+                <div class="text-muted small">@borc.Aciklama</div>
+              }
+
+              @if (borc.OtomatikOdeme)
+              {
+                <div class="mt-2">
+                  <span class="badge bg-success">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Otomatik Ödeme (@borc.OtomatikOdemeTutari?.ToString("N2") ₺)
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Silme Modal -->
+<div class="modal fade" id="silModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Borç Takibini Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Dikkat:</strong> <span id="silmeMetni"></span>
+        </p>
+        <p>Bu işlem geri alınamaz.</p>
+      </div>
+      <div class="modal-footer">
+        @using (Html.BeginForm("Sil", "BorcTakip", FormMethod.Post, new { id = "silForm" }))
+        {
+          @Html.AntiForgeryToken()
+          <input type="hidden" id="silinecekId" name="id" />
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-1"></i> Sil
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    function silmeModaliniGoster(id, ad) {
+      document.getElementById('silinecekId').value = id;
+      document.getElementById('silmeMetni').textContent = `${ad} borç takibini silmek istediğinizden emin misiniz?`;
+      new bootstrap.Modal(document.getElementById('silModal')).show();
+    }
+  </script>
+}

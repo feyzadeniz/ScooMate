@@ -1,0 +1,388 @@
+@model ScooMate.Models.ButcePlanlama
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="card-title mb-0">@Model.Tarih.ToString("MMMM yyyy") Bütçe Planlaması</h2>
+          </div>
+
+          <div class="row mb-4">
+            <!-- gelirler bölümü -->
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h4 class="card-title text-success">
+                    <i class="fas fa-plus-circle me-2"></i>Gelirler
+                    <span class="float-end" id="toplamGelir">@Model.Gelirler.ToString("C")</span>
+                  </h4>
+                  <div class="list-group mb-3" id="gelirListesi">
+                    @foreach (var gelir in Model.Kalemler.Where(k => k.IsGelir))
+                    {
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="kalem-goruntuleme">
+                            <strong>@gelir.Aciklama</strong>
+                            <span class="text-success ms-2">@gelir.Tutar.ToString("C")</span>
+                          </div>
+                          <div class="kalem-duzenleme" style="display:none;">
+                            <div class="input-group">
+                              <input type="text" class="form-control form-control-sm me-2" 
+                                     value="@gelir.Aciklama" name="aciklama">
+                              <div class="input-group input-group-sm">
+                                <input type="number" min="0" class="form-control tl-input" 
+                                       value="@Math.Floor(gelir.Tutar)" placeholder="TL">
+                                <span class="input-group-text">TL</span>
+                              </div>
+                              <div class="input-group input-group-sm">
+                                <input type="number" min="0" max="99" class="form-control kurus-input" 
+                                       value="@((gelir.Tutar - Math.Floor(gelir.Tutar)) * 100)" placeholder="Kr">
+                                <span class="input-group-text">Kr</span>
+                              </div>
+                              <input type="hidden" name="tutar" class="tutar-hidden" value="@gelir.Tutar">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="btn-group">
+                          <button class="btn btn-sm btn-outline-primary kalem-duzenle" data-kalem-id="@gelir.ButceKalemID">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-success kalem-kaydet" style="display:none;" 
+                                  data-kalem-id="@gelir.ButceKalemID">
+                            <i class="fas fa-check"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger kalem-sil" data-kalem-id="@gelir.ButceKalemID">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <form id="gelirForm" class="mt-3">
+                    <input type="hidden" name="butcePlanlamaId" value="@Model.ButcePlanlamaID" />
+                    <input type="hidden" name="isGelir" value="true" />
+                    <div class="row g-2">
+                      <div class="col-5">
+                        <input type="text" class="form-control" name="aciklama" placeholder="Gelir açıklaması" required>
+                      </div>
+                      <div class="col-5">
+                        <div class="input-group">
+                          <input type="text" class="form-control tutar-input" name="tutar" placeholder="Tutar" required>
+                          <span class="input-group-text">TL</span>
+                        </div>
+                      </div>
+                      <div class="col-2">
+                        <button type="submit" class="btn btn-success w-100">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- giderler bölümü -->
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h4 class="card-title text-danger">
+                    <i class="fas fa-minus-circle me-2"></i>Temel Giderler
+                    <span class="float-end" id="toplamGider">@Model.TemelGiderler.ToString("C")</span>
+                  </h4>
+                  <div class="list-group mb-3" id="giderListesi">
+                    @foreach (var gider in Model.Kalemler.Where(k => !k.IsGelir))
+                    {
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="kalem-goruntuleme">
+                            <strong>@gider.Aciklama</strong>
+                            <span class="text-danger ms-2">@gider.Tutar.ToString("C")</span>
+                          </div>
+                          <div class="kalem-duzenleme" style="display:none;">
+                            <div class="input-group">
+                              <input type="text" class="form-control form-control-sm me-2" 
+                                     value="@gider.Aciklama" name="aciklama">
+                              <input type="text" class="form-control form-control-sm tutar-input" 
+                                     value="@gider.Tutar.ToString("F2")" name="tutar">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="btn-group">
+                          <button class="btn btn-sm btn-outline-primary kalem-duzenle" data-kalem-id="@gider.ButceKalemID">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-success kalem-kaydet" style="display:none;" 
+                                  data-kalem-id="@gider.ButceKalemID">
+                            <i class="fas fa-check"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger kalem-sil" data-kalem-id="@gider.ButceKalemID">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <form id="giderForm" class="mt-3">
+                    <input type="hidden" name="butcePlanlamaId" value="@Model.ButcePlanlamaID" />
+                    <input type="hidden" name="isGelir" value="false" />
+                    <div class="row g-2">
+                      <div class="col-5">
+                        <input type="text" class="form-control" name="aciklama" placeholder="Gider açıklaması" required>
+                      </div>
+                      <div class="col-5">
+                        <div class="input-group">
+                          <input type="text" class="form-control tutar-input" name="tutar" placeholder="Tutar" required>
+                          <span class="input-group-text">TL</span>
+                        </div>
+                      </div>
+                      <div class="col-2">
+                        <button type="submit" class="btn btn-danger w-100">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- kullanılabilir limit -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <h4 class="card-title d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <i class="fas fa-calculator text-primary me-2"></i>
+                  <span>Kullanılabilir Limit</span>
+                </div>
+                <button class="btn btn-outline-warning btn-sm" id="limitSifirla">
+                  <i class="fas fa-redo-alt me-1"></i>Limiti Sıfırla
+                </button>
+              </h4>
+              <div class="alert @(Model.KullanilabilirLimit > 0 ? "alert-success" : "alert-danger")" id="limitAlert">
+                <h3 class="mb-0">@Model.KullanilabilirLimit.ToString("C")</h3>
+                <small class="text-muted">Bu ay kullanabileceğiniz toplam tutar</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    // limit sıfırlama işlemi
+    $('#limitSifirla').on('click', function() {
+      if (confirm('Tüm gelir ve giderleri silmek istediğinize emin misiniz?')) {
+        $.post('@Url.Action("LimitSifirla")', { 
+          butcePlanlamaId: @Model.ButcePlanlamaID 
+        }, function(response) {
+          if (response.success) {
+            // tüm listeleri temizle
+            $('#gelirListesi').empty();
+            $('#giderListesi').empty();
+            
+            // toplamları sıfırla
+            $('#toplamGelir').text(formatCurrency(response.gelirler));
+            $('#toplamGider').text(formatCurrency(response.giderler));
+            
+            $('#limitAlert').html(`
+              <h3 class="mb-0">${formatCurrency(0)}</h3>
+              <small class="text-muted">Bu ay kullanabileceğiniz toplam tutar</small>
+            `).removeClass('alert-success')
+              .addClass('alert-danger');
+          }
+        });
+      }
+    });
+
+    // tutar kontrolü
+    $('.tutar-input').on('input', function() {
+        // Sadece sayı ve virgül girişine izin ver
+        let value = this.value.replace(/[^\d,]/g, '');
+        
+        // virgül kontrolü
+        if (value.includes(',')) {
+            let [lira, kurus] = value.split(',');
+            // kuruş kısmını 2 basamakla sınırla
+            if (kurus && kurus.length > 2) {
+                kurus = kurus.slice(0, 2);
+            }
+            value = lira + ',' + (kurus || '');
+        }
+        
+        this.value = value;
+    });
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('tr-TR', {
+        style: 'currency',
+        currency: 'TRY',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        useGrouping: true 
+      }).format(amount);
+    }
+
+    function handleFormSubmit(formId, listId, totalId) {
+        $(`#${formId}`).on('submit', function (e) {
+            e.preventDefault();
+            
+            const tutarInput = $(this).find('.tutar-input');
+            let tutarStr = tutarInput.val();
+            
+            
+            if (!tutarStr) {
+                alert('Lütfen tutar giriniz');
+                return;
+            }
+            
+            
+            let tutar = tutarStr.replace(/[^\d,]/g, '');
+            if (tutar.includes(',')) {
+                let [lira, kurus] = tutar.split(',');
+                kurus = (kurus || '').padEnd(2, '0').slice(0, 2);
+                tutar = lira + ',' + kurus;
+            } else {
+                tutar = tutar + ',00';
+            }
+            
+            const formData = {
+                butcePlanlamaId: @Model.ButcePlanlamaID,
+                aciklama: $(this).find('[name="aciklama"]').val(),
+                tutar: tutar, // virgüllü string olarak gönder
+                isGelir: $(this).find('[name="isGelir"]').val() === 'true'
+            };
+            
+            $.post('@Url.Action("KalemEkle")', formData, function (response) {
+                if (response.success) {
+                    const form = $(`#${formId}`);
+                    const aciklama = form.find('[name="aciklama"]').val();
+                    
+                    const isGelir = form.find('[name="isGelir"]').val() === 'true';
+                    const textClass = isGelir ? 'text-success' : 'text-danger';
+                    
+                    const yeniKalem = `
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="kalem-goruntuleme">
+                            <strong>${aciklama}</strong>
+                            <span class="${textClass} ms-2">${formatCurrency(response.yeniKalemTutar)}</span>
+                          </div>
+                          <div class="kalem-duzenleme" style="display:none;">
+                            <div class="input-group">
+                              <input type="text" class="form-control form-control-sm me-2" value="${aciklama}" name="aciklama">
+                              <input type="text" class="form-control form-control-sm tutar-input" value="${response.yeniKalemTutar}" name="tutar">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="btn-group">
+                          <button class="btn btn-sm btn-outline-primary kalem-duzenle" data-kalem-id="${response.kalemId}">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-success kalem-kaydet" style="display:none;" data-kalem-id="${response.kalemId}">
+                            <i class="fas fa-check"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger kalem-sil" data-kalem-id="${response.kalemId}">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                    
+                    $(`#${listId}`).append(yeniKalem);
+                    $(`#${totalId}`).text(formatCurrency(response.yeniToplam));
+                    
+                    $('#limitAlert').html(`
+                      <h3 class="mb-0">${formatCurrency(response.kullanilabilirLimit)}</h3>
+                      <small class="text-muted">Bu ay kullanabileceğiniz toplam tutar</small>
+                    `).removeClass('alert-success alert-danger')
+                      .addClass(response.kullanilabilirLimit > 0 ? 'alert-success' : 'alert-danger');
+                    
+                    form[0].reset();
+                }
+            });
+        });
+    }
+
+    $(document).ready(function () {
+        handleFormSubmit('gelirForm', 'gelirListesi', 'toplamGelir');
+        handleFormSubmit('giderForm', 'giderListesi', 'toplamGider');
+
+        $(document).on('click', '.kalem-sil', function () {
+            const button = $(this);
+            const kalemId = button.data('kalem-id');
+            const listItem = button.closest('.list-group-item');
+            const isGelir = listItem.closest('#gelirListesi').length > 0;
+            const totalId = isGelir ? 'toplamGelir' : 'toplamGider';
+            const listId = isGelir ? 'gelirListesi' : 'giderListesi';
+
+            $.post('@Url.Action("KalemSil")', { kalemId: kalemId }, function (response) {
+                if (response.success) {
+                    listItem.remove();
+                    $(`#${totalId}`).text(formatCurrency(response.yeniToplam));
+
+                    // liste boşsa toplam sıfırlanır
+                    if ($(`#${listId}`).children().length === 0) {
+                        $(`#${totalId}`).text(formatCurrency(0));
+                    }
+
+                    $('#limitAlert').html(`
+                      <h3 class="mb-0">${formatCurrency(response.kullanilabilirLimit)}</h3>
+                      <small class="text-muted">Bu ay kullanabileceğiniz toplam tutar</small>
+                    `).removeClass('alert-success alert-danger')
+                      .addClass(response.kullanilabilirLimit > 0 ? 'alert-success' : 'alert-danger');
+                }
+            });
+        });
+
+        $(document).on('click', '.kalem-duzenle', function() {
+            const listItem = $(this).closest('.list-group-item');
+            listItem.find('.kalem-goruntuleme').hide();
+            listItem.find('.kalem-duzenleme').show();
+            $(this).hide();
+            listItem.find('.kalem-kaydet').show();
+        });
+
+        $(document).on('click', '.kalem-kaydet', function() {
+            const button = $(this);
+            const listItem = button.closest('.list-group-item');
+            const kalemId = button.data('kalem-id');
+            const aciklama = listItem.find('input[name="aciklama"]').val();
+            const tutar = listItem.find('input[name="tutar"]').val().replace(/\./g, '').replace(',', '.');
+
+            $.post('@Url.Action("KalemDuzenle")', {
+                kalemId: kalemId,
+                aciklama: aciklama,
+                tutar: tutar
+            }, function(response) {
+                if (response.success) {
+                    const isGelir = listItem.closest('#gelirListesi').length > 0;
+                    const textClass = isGelir ? 'text-success' : 'text-danger';
+                    const totalId = isGelir ? 'toplamGelir' : 'toplamGider';
+
+                    listItem.find('.kalem-goruntuleme strong').text(aciklama);
+                    listItem.find('.kalem-goruntuleme span').text(formatCurrency(response.yeniKalemTutar));
+                    
+                    listItem.find('.kalem-goruntuleme').show();
+                    listItem.find('.kalem-duzenleme').hide();
+                    button.hide();
+                    listItem.find('.kalem-duzenle').show();
+
+                    $(`#${totalId}`).text(formatCurrency(response.yeniToplam));
+                    $('#limitAlert').html(`
+                      <h3 class="mb-0">${formatCurrency(response.kullanilabilirLimit)}</h3>
+                      <small class="text-muted">Bu ay kullanabileceğiniz toplam tutar</small>
+                    `).removeClass('alert-success alert-danger')
+                      .addClass(response.kullanilabilirLimit > 0 ? 'alert-success' : 'alert-danger');
+                }
+            });
+        });
+    });
+  </script>
+}

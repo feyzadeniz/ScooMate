@@ -1,0 +1,140 @@
+@using ScooMate.Extensions
+@model IEnumerable<ScooMate.Models.FaturaTakip>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="mb-0">Fatura Takibi</h2>
+        </div>
+        <a href="@Url.Action("Ekle")" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Yeni Fatura Ekle
+        </a>
+    </div>
+
+    @if (TempData["Mesaj"] != null)
+    {
+        <div class="alert alert-@TempData["MesajTipi"] alert-dismissible fade show" role="alert">
+            @TempData["Mesaj"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Henüz fatura takibi eklenmemiş.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var fatura in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@fatura.FaturaAdi</h5>
+                                    <span class="badge bg-secondary">@fatura.FaturaTipi.GetDisplayName()</span>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item"
+                                                href="@Url.Action("Duzenle", new { id = fatura.FaturaID })">
+                                                <i class="fas fa-edit me-2"></i>Düzenle
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item text-danger" type="button"
+                                                onclick="silmeModaliniGoster(@fatura.FaturaID, '@fatura.FaturaAdi')">
+                                                <i class="fas fa-trash-alt me-2"></i>Sil
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Tutar:</span>
+                                    <strong>@fatura.Tutar.ToString("N2") ₺</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Kesim Günü:</span>
+                                    <span>@fatura.FaturaKesimGunu</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Son Ödeme:</span>
+                                    <span>@fatura.SonOdemeGunu</span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(fatura.Aciklama))
+                            {
+                                <div class="text-muted small">@fatura.Aciklama</div>
+                            }
+
+                            @if (fatura.OtomatikOdeme)
+                            {
+                                <div class="mt-2">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Otomatik Ödeme
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Silme Modal -->
+<div class="modal fade" id="silModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Fatura Takibini Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Dikkat:</strong> <span id="silmeMetni"></span>
+                </p>
+                <p>Bu işlem geri alınamaz.</p>
+            </div>
+            <div class="modal-footer">
+                @using (Html.BeginForm("Sil", "FaturaTakip", FormMethod.Post, new { id = "silForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="silinecekId" name="id" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Sil
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function silmeModaliniGoster(id, ad) {
+            document.getElementById('silinecekId').value = id;
+            document.getElementById('silmeMetni').textContent = `${ad} fatura takibini silmek istediğinizden emin misiniz?`;
+            new bootstrap.Modal(document.getElementById('silModal')).show();
+        }
+    </script>
+}
