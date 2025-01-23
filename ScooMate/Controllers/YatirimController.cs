@@ -140,5 +140,37 @@ namespace ScooMate.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TumYatirimlariSil()
+        {
+            var kullaniciId = HttpContext.Session.GetInt32("KullaniciID");
+            if (kullaniciId == null)
+            {
+                return RedirectToAction("GirisYap", "Kullanici");
+            }
+
+            try
+            {
+                var yatirimlar = await _db.Yatirimlar
+                    .Where(y => y.KullaniciID == kullaniciId)
+                    .ToListAsync();
+
+                _db.Yatirimlar.RemoveRange(yatirimlar);
+                await _db.SaveChangesAsync();
+
+                TempData["Mesaj"] = "Tüm yatırımlar başarıyla silindi.";
+                TempData["MesajTipi"] = "success";
+            }
+            catch (Exception ex)
+            {
+                TempData["Mesaj"] = "Yatırımlar silinirken bir hata oluştu.";
+                TempData["MesajTipi"] = "danger";
+                System.Diagnostics.Debug.WriteLine($"Hata: {ex.Message}");
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

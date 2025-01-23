@@ -250,23 +250,38 @@ namespace ScooMate.Controllers
         return RedirectToAction("GirisYap", "Kullanici");
       }
 
+      // Kategoriyi ve ilişkili harcamaları getir
       var kategori = await _db.Kategoriler
-          .Include(k => k.Harcamalar)
-          .FirstOrDefaultAsync(k => k.KategoriID == id && k.KullaniciID == kullaniciId);
+          .Include(k => k.Harcamalar.Where(h => h.KullaniciID == kullaniciId))
+          .FirstOrDefaultAsync(k => k.KategoriID == id);
 
       if (kategori == null)
       {
         return NotFound();
       }
 
-      // kategoriye ait tüm harcamaları sil
-      _db.Harcamalar.RemoveRange(kategori.Harcamalar);
-      await _db.SaveChangesAsync();
+      try
+      {
+        // Sadece bu kullanıcıya ait harcamaları sil
+        var harcamalar = await _db.Harcamalar
+            .Where(h => h.KategoriID == id && h.KullaniciID == kullaniciId)
+            .ToListAsync();
 
-      TempData["Mesaj"] = "Tüm harcamalar başarıyla silindi.";
-      TempData["MesajTipi"] = "success";
+        _db.Harcamalar.RemoveRange(harcamalar);
+        await _db.SaveChangesAsync();
 
-      return RedirectToAction(nameof(Detay), new { id = kategori.KategoriID });
+        TempData["Mesaj"] = "Tüm harcamalar başarıyla silindi.";
+        TempData["MesajTipi"] = "success";
+      }
+      catch (Exception ex)
+      {
+        TempData["Mesaj"] = "Harcamalar silinirken bir hata oluştu.";
+        TempData["MesajTipi"] = "danger";
+        // Hata mesajını logla
+        System.Diagnostics.Debug.WriteLine($"Hata: {ex.Message}");
+      }
+
+      return RedirectToAction(nameof(Detay), new { id = id });
     }
   }
 }
