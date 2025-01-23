@@ -1,6 +1,9 @@
 # Harcama Takip Sistemi - ScooMate
 
-ScooMate bir harcama takip sistemidir. "Dijital finansal arkadaş"ınız olmayı amaçlayan bu sistem ile finansal işlerinizi kolaylaştırabilir ve ajanda üzerinde hesaplamalar yapmaktan daha hızlı bir çözüme kavuşabilirsiniz. 
+ScooMate, harcamalarınızı kolaylıkla yönetebileceğiniz bir sistemdir. Dijital ajanda görevini üstlenmek üzere geliştirildi. İsmi animasyon dünyasının en zengini Scrooge McDuck (Varyemez Amca) karakterinden geliyor. 2007 senesinde, 28,8 milyar dolar değerindeki hazinesi ile Forbes'in kurgusal zenginleri listesinde birinci sırada yer almıştır. Bu sistem de sizin finansal dostunuz olarak sizi zenginleştirmeyi amaçlıyor.
+
+![image](https://github.com/user-attachments/assets/5b3da5db-64b8-4401-b163-d608c99d1de5)
+
 
 # Özellikleri
 
