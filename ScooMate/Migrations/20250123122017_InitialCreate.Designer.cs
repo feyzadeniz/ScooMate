@@ -12,8 +12,8 @@ using ScooMate.Data;
 namespace ScooMate.Migrations
 {
     [DbContext(typeof(ScoomateContext))]
-    [Migration("20250115184718_IstatistikTekrarGuncelledim")]
-    partial class IstatistikTekrarGuncelledim
+    [Migration("20250123122017_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -380,6 +380,37 @@ namespace ScooMate.Migrations
                     b.ToTable("KullanicilarNew", (string)null);
                 });
 
+            modelBuilder.Entity("ScooMate.Models.Yatirim", b =>
+                {
+                    b.Property<int>("YatirimID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("YatirimID"));
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("KullaniciID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Miktar")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Tarih")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Tur")
+                        .HasColumnType("int");
+
+                    b.HasKey("YatirimID");
+
+                    b.HasIndex("KullaniciID");
+
+                    b.ToTable("YatirimlarNew", (string)null);
+                });
+
             modelBuilder.Entity("ScooMate.Models.Bildirim", b =>
                 {
                     b.HasOne("ScooMate.Models.Kullanici", "Kullanici")
@@ -470,6 +501,17 @@ namespace ScooMate.Migrations
                     b.HasOne("ScooMate.Models.Kullanici", "Kullanici")
                         .WithMany()
                         .HasForeignKey("KullaniciID");
+
+                    b.Navigation("Kullanici");
+                });
+
+            modelBuilder.Entity("ScooMate.Models.Yatirim", b =>
+                {
+                    b.HasOne("ScooMate.Models.Kullanici", "Kullanici")
+                        .WithMany()
+                        .HasForeignKey("KullaniciID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Kullanici");
                 });

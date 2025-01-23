@@ -22,7 +22,7 @@
   </div>
 
   <div class="row">
-    <!-- Aylık Toplam ve Günlük Ortalama -->
+    <!-- aylık toplam ve günlük ortalama -->
     <div class="col-md-6 col-lg-3 mb-4">
       <div class="card h-100">
         <div class="card-body">
@@ -42,7 +42,7 @@
   </div>
 
   <div class="row">
-    <!-- Kategorik Harcamalar -->
+    <!-- kategorik harcamalar -->
     <div class="col-md-6 mb-4">
       <div class="card h-100">
         <div class="card-body">
@@ -75,7 +75,7 @@
       </div>
     </div>
 
-    <!-- En Yüksek Harcamalar -->
+    <!-- en yüksek harcamalar -->
     <div class="col-md-6 mb-4">
       <div class="card h-100">
         <div class="card-body">
@@ -108,7 +108,7 @@
     </div>
   </div>
 
-  <!-- Yıllık Özet -->
+  <!-- yıllık özet -->
   <div class="card mb-4">
     <div class="card-body">
       <h5 class="card-title mb-4">@Model.YillikOzet.Yil Yılı Özeti</h5>
@@ -164,7 +164,7 @@
   <script>
     const ctx = document.getElementById('kategoriChart').getContext('2d');
 
-    // Kategori-Renk eşleştirmesi
+    // kategori-renk eşleştirmesi
     const KATEGORI_RENKLERI = {
       'Market': '#FF6384',    // Kırmızı
       'Ulaşım': '#36A2EB',    // Mavi
@@ -178,7 +178,7 @@
     const kategoriler = [@Html.Raw(string.Join(",", Model.KategorikHarcamalar.Select(k => $"'{k.Kategori}'")))];
     const veriler = [@string.Join(",", Model.KategorikHarcamalar.Select(k => k.ToplamTutar))];
 
-    // Her kategori için doğru rengi seç
+    // her kategori için doğru rengi seç
     const renkler = kategoriler.map(kategori =>
       KATEGORI_RENKLERI[kategori.replace(/'/g, '')] || '#808080'
     );

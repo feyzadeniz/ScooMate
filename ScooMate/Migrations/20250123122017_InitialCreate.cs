@@ -132,6 +132,33 @@ namespace ScooMate.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IstatistikKayitlariNew",
+                columns: table => new
+                {
+                    IstatistikID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Donem = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AylikToplamHarcama = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    GunlukOrtalamaHarcama = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    KategorikHarcamaDetaylari = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EnYuksekHarcamaDetaylari = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    YillikOzetDetaylari = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OlusturmaTarihi = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GuncellemeTarihi = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    KullaniciID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IstatistikKayitlariNew", x => x.IstatistikID);
+                    table.ForeignKey(
+                        name: "FK_IstatistikKayitlariNew_KullanicilarNew_KullaniciID",
+                        column: x => x.KullaniciID,
+                        principalTable: "KullanicilarNew",
+                        principalColumn: "KullaniciID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "KategorilerNew",
                 columns: table => new
                 {
@@ -151,6 +178,29 @@ namespace ScooMate.Migrations
                         column: x => x.KullaniciID,
                         principalTable: "KullanicilarNew",
                         principalColumn: "KullaniciID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "YatirimlarNew",
+                columns: table => new
+                {
+                    YatirimID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    KullaniciID = table.Column<int>(type: "int", nullable: false),
+                    Tur = table.Column<int>(type: "int", nullable: false),
+                    Miktar = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Tarih = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Aciklama = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_YatirimlarNew", x => x.YatirimID);
+                    table.ForeignKey(
+                        name: "FK_YatirimlarNew_KullanicilarNew_KullaniciID",
+                        column: x => x.KullaniciID,
+                        principalTable: "KullanicilarNew",
+                        principalColumn: "KullaniciID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -250,8 +300,18 @@ namespace ScooMate.Migrations
                 column: "KullaniciID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_IstatistikKayitlariNew_KullaniciID",
+                table: "IstatistikKayitlariNew",
+                column: "KullaniciID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KategorilerNew_KullaniciID",
                 table: "KategorilerNew",
+                column: "KullaniciID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_YatirimlarNew_KullaniciID",
+                table: "YatirimlarNew",
                 column: "KullaniciID");
         }
 
@@ -272,6 +332,12 @@ namespace ScooMate.Migrations
 
             migrationBuilder.DropTable(
                 name: "HarcamalarNew");
+
+            migrationBuilder.DropTable(
+                name: "IstatistikKayitlariNew");
+
+            migrationBuilder.DropTable(
+                name: "YatirimlarNew");
 
             migrationBuilder.DropTable(
                 name: "ButcePlanlamalarNew");
