@@ -66,6 +66,7 @@ Projemi tanıttığım video :
 https://youtu.be/l7rcABMpaG8
 
 Veritabanı diyagramı:
+
 ![image](https://github.com/user-attachments/assets/44563579-1cd6-46f6-a911-2277703d3ebe)
 
 
