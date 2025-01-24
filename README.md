@@ -61,3 +61,11 @@ Yatırım sekmesinde yatırım harcamalarınızı ekleyebilir ve portföyünüz�
 
 ![Ekran Görüntüsü (127)](https://github.com/user-attachments/assets/f4ea3b48-2f6d-4c7d-b85b-3b75810777e2)
 
+
+Projemi tanıttığım video :
+https://youtu.be/l7rcABMpaG8
+
+Veritabanı diyagramı:
+![image](https://github.com/user-attachments/assets/44563579-1cd6-46f6-a911-2277703d3ebe)
+
+
